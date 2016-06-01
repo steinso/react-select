@@ -184,8 +184,8 @@ const Select = React.createClass({
 	},
 
 	componentDidUpdate (prevProps, prevState) {
-		// focus to the selected option
-		if (this.refs.menu && this.refs.focused && this.state.isOpen && !this.hasScrolledToOption) {
+		// focus to the selected option, unless it is a multi-select; then we want to retain scroll position
+		if (this.refs.menu && this.refs.focused && this.state.isOpen && !this.hasScrolledToOption && !this.props.multi) {
 			let focusedOptionNode = ReactDOM.findDOMNode(this.refs.focused);
 			let menuNode = ReactDOM.findDOMNode(this.refs.menu);
 			menuNode.scrollTop = focusedOptionNode.offsetTop;
@@ -866,7 +866,7 @@ const Select = React.createClass({
 		));
 	},
 
-	getFocusableOptionIndex (selectedOption) {
+	getFocusableOptionIndex (selectedOption, previousIndex) {
 		var options = this._visibleOptions;
 		if (!options.length) return null;
 
@@ -877,6 +877,20 @@ const Select = React.createClass({
 				return focusedOptionIndex;
 			}
 		}
+
+		if (previousIndex > -1) {
+			// We start at the position of the previous index instead of 0
+			
+			// First trace forward as it is most natural that the next element is selected
+			for (var i = previousIndex; i < options.length; i++) {
+				if (!options[i].disabled) return i;
+			}
+
+			// then trace backwards
+			for (var i = previousIndex - 1; i > -1 && i < options.length; i--) {
+				if (!options[i].disabled) return i;
+			}
+		};
 
 		for (var i = 0; i < options.length; i++) {
 			if (!options[i].disabled) return i;
@@ -904,10 +918,12 @@ const Select = React.createClass({
 
 	render () {
 		let valueArray = this.getValueArray(this.props.value);
+		if(this._visibleOptions === undefined) this._visibleOptions = [];
+		let previousIndex = this._visibleOptions.indexOf(valueArray[valueArray.length - 1]);
 		let options = this._visibleOptions = this.filterOptions(this.props.multi ? valueArray : null);
 		let isOpen = this.state.isOpen;
 		if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
-		const focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0]);
+		const focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0], previousIndex);
 
 		let focusedOption = null;
 		if (focusedOptionIndex !== null) {
