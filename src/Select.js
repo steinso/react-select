@@ -919,8 +919,12 @@ const Select = React.createClass({
 	render () {
 		let valueArray = this.getValueArray(this.props.value);
 		if(this._visibleOptions === undefined) this._visibleOptions = [];
-		let value = valueArray[valueArray.length - 1].value;
-		let previousIndex = this._visibleOptions.map(o => o.value).indexOf(value); 
+		let previousIndex = -1;
+		if(valueArray.length > 0) {
+			let value = valueArray[valueArray.length - 1].value;
+			previousIndex = this._visibleOptions.map(o => o.value).indexOf(value);
+		}
+			
 		let options = this._visibleOptions = this.filterOptions(this.props.multi ? valueArray : null);
 		let isOpen = this.state.isOpen;
 		if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
