@@ -920,8 +920,7 @@ const Select = React.createClass({
 		let valueArray = this.getValueArray(this.props.value);
 		if(this._visibleOptions === undefined) this._visibleOptions = [];
 		let value = valueArray[valueArray.length - 1].value;
-		// Cannot use indexOf with objects
-		let previousIndex = this._visibleOptions.reduce((a,c,i) => {return (c.value === value) ? i : a, -1})
+		let previousIndex = this._visibleOptions.map(o => o.value).indexOf(value); 
 		let options = this._visibleOptions = this.filterOptions(this.props.multi ? valueArray : null);
 		let isOpen = this.state.isOpen;
 		if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
